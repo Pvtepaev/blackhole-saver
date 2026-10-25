@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Written by install.sh: apt packages it added, read back by uninstall.sh
+.installed-packages
+
+# Local config and screenshots used for testing
+config.toml
+*.png
+!docs/**/*.png
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Claude Code local settings
+.claude/settings.local.json

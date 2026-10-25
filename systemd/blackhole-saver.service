@@ -1,0 +1,17 @@
+[Unit]
+Description=Black hole screensaver (idle launcher)
+Documentation=file://%h/.local/share/blackhole-saver/README.md
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -m blackhole_saver daemon
+ExecReload=/bin/kill -HUP $MAINPID
+Environment=PYTHONPATH=%h/.local/share/blackhole-saver
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=graphical-session.target

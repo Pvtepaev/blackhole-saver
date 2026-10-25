@@ -1,0 +1,56 @@
+# blackhole-saver configuration
+# Location: ~/.config/blackhole-saver/config.toml
+# Every key is optional; missing keys use the defaults shown here. Values out
+# of range are clamped (and logged). Changes apply on the next launch; send
+# SIGHUP to apply a new idle timeout without restarting:
+#   systemctl --user reload blackhole-saver
+
+[idle]
+timeout_sec = 120               # seconds of no input before the saver starts.
+                                # Keep it below GNOME's Settings > Power >
+                                # Screen Blank delay, or GNOME blanks first.
+skip_when_inhibited = true      # don't start while an app inhibits idle (video, presentations)
+skip_when_media_playing = true  # don't start while any MPRIS player reports "Playing"
+
+[capture]
+method = "auto"                 # auto | portal | gnome-screenshot | maim | import | none
+                                # auto: Wayland = portal, then gnome-screenshot;
+                                #       X11 = maim, then import, then portal.
+                                # none: always lens the procedural starfield.
+
+[render]
+render_scale = 0.5              # 0.1..1.0 - fraction of native resolution the shader runs at.
+                                # 0.5 = a quarter of the pixels; good for integrated GPUs.
+fps = 30                        # 30..60 frame cap
+n_steps = 48                    # geodesic integration steps per pixel near the hole (8..256).
+                                # The dominant GPU cost; 32 still looks fine.
+fade_in_sec = 1.5               # the hole fades in over this long
+
+[hole]
+size_mode = "grow"              # grow: size breathes between size_min and 1 over grow_period_sec
+                                # fixed: size stays at fixed_size
+hole_radius = 0.08              # shadow radius at full size, as a fraction of screen height.
+                                # The bright disk reaches about 3x further.
+fixed_size = 0.6                # size_mode = "fixed": 0.1..1 of hole_radius
+size_min = 0.25                 # size_mode = "grow": smallest size, 0.1..1 of hole_radius
+grow_period_sec = 180           # size_mode = "grow": seconds for one small -> big -> small cycle
+drift_speed = 0.35              # how fast the hole wanders around the screen (0 = parked)
+lens_depth = 13.0               # distance from the hole to the desktop "sky" plane, in
+                                # Schwarzschild radii; bigger = the desktop bends harder
+star_gain = 0.6                 # brightness of the lensed starfield around the hole (0 = off)
+dilation_min = 0.2              # disk pattern speed at full size (gravitational time dilation)
+
+[disk]
+inner = 1.8                     # inner edge, Schwarzschild radii (3 = ISCO; min 1.6)
+outer = 8.0                     # outer edge
+incl = 1.5                      # inclination, rad: 0 = face-on, 1.57 = edge-on
+roll = 0.35                     # rotation of the whole system in the screen plane, rad
+gain = 2.2                      # emission brightness
+opacity = 0.9                   # how much the near disk hides what is behind it (0..1)
+temp = 5500.0                   # temperature of the hottest annulus, Kelvin
+doppler_mix = 0.6               # 0 = no relativistic color/brightness asymmetry, 1 = full
+beam = 2.5                      # beaming exponent: observed intensity ~ g^beam
+speed = 5.0                     # streak pattern speed; negative reverses the orbit
+wind = 7.0                      # spiral winding of the streaks
+contrast = 1.6                  # 0 = smooth haze, higher = sharp filaments
+exposure = 1.4                  # tonemap exposure for the disk light
