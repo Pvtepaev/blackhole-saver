@@ -222,7 +222,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // fade-in at launch: warp and disk grow from nothing over a second or two
     float vis = smoothstep(0.0, 0.10, I) * uFade;
     if (vis <= 0.0) {
-        fragColor = vec4(bgSample(uv), 1.0);
+        fragColor = vec4(bgSample(uv), 0.0);
         return;
     }
 
@@ -280,7 +280,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         // same starfield as the geodesic region, lit through the weak-field
         // bend so stars don't pop at the boundary circle
         vec3 d = normalize(vec3(-(pr / b) * (2.0 / b), -1.0));
-        fragColor = vec4(term + stars(d) * L.star * window * shield, 1.0);
+        vec3 st = stars(d) * L.star * window * shield;
+        // alpha: how much this pixel differs from the plain desktop. Where the
+        // warp is under half a render pixel (and no star shows), the blit pass
+        // uses the native-resolution screenshot instead of this upscaled one.
+        float a = max(clamp(defl * res.y * 2.0, 0.0, 1.0),
+                      clamp(dot(st, vec3(4.0)), 0.0, 1.0));
+        fragColor = vec4(term + st, a);
         return;
     }
 

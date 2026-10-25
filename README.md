@@ -51,7 +51,7 @@ It then copies the program to `~/.local/share/blackhole-saver`, puts a launcher 
 | Key | Default | |
 |---|---|---|
 | `idle.timeout_sec` | 120 | Idle seconds before launch. Must be below GNOME's Screen Blank delay. |
-| `render.render_scale` | 0.5 | Fraction of native resolution the shader runs at; it is upscaled with linear filtering. |
+| `render.render_scale` | 0.5 | Fraction of native resolution the shader runs at; it is upscaled with linear filtering. Away from the hole the desktop is drawn from the screenshot at native resolution, so only the warped area is softened. |
 | `render.fps` | 30 | Frame cap, 30–60. |
 | `render.n_steps` | 48 | Geodesic steps per pixel near the hole. This is the main GPU cost. |
 | `hole.size_mode` | `"grow"` | `grow`: size cycles `size_min → 1 → size_min` every `grow_period_sec`. `fixed`: size stays at `fixed_size`. |
@@ -76,7 +76,7 @@ Config is re-read on every launch. A changed idle timeout needs `systemctl --use
   1. takes the screenshot (Wayland: xdg-desktop-portal, then `gnome-screenshot`; X11: `maim`, then `import`)
   2. opens one fullscreen GTK4 window with its own `GtkGLArea` GL context per monitor, with the cursor hidden
   3. gives each monitor its own slice of the screenshot
-  4. renders at `render_scale` and upscales
+  4. renders at `render_scale` and upscales, drawing unwarped desktop at native resolution
 
   If no screenshot works, a procedural starfield is lensed instead. When GNOME blanks or locks the screen, the daemon stops the saver.
 

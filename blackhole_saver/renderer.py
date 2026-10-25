@@ -129,7 +129,8 @@ class MonitorView:
                                         pb.read_pixel_bytes().get_data())
         self.u = {n: GL.glGetUniformLocation(self.prog, n) for n in
                   ("iResolution", "iTime", "iChannel0", "uHasBg", "uSeed", "uFade")}
-        self.u_blit = GL.glGetUniformLocation(self.blit, "uTex")
+        self.u_blit = {n: GL.glGetUniformLocation(self.blit, n) for n in
+                       ("uTex", "uBg", "uHasBg")}
         if not self.saver.gl_logged:
             self.saver.gl_logged = True
             log.info("GL: %s / %s", GL.glGetString(GL.GL_RENDERER).decode(),
@@ -193,13 +194,27 @@ class MonitorView:
         GL.glUniform1i(self.u["iChannel0"], 0)
         GL.glActiveTexture(GL.GL_TEXTURE0)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.bg_tex or 0)
-        GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+        if offscreen:
+            GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+        else:
+            # the shader's alpha is only a blend weight for the blit pass;
+            # keep GtkGLArea's framebuffer opaque
+            GL.glClearColor(0.0, 0.0, 0.0, 1.0)
+            GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+            GL.glColorMask(True, True, True, False)
+            GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+            GL.glColorMask(True, True, True, True)
 
         if offscreen:
             GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, target)
             GL.glViewport(0, 0, w, h)
             GL.glUseProgram(self.blit)
-            GL.glUniform1i(self.u_blit, 0)
+            GL.glUniform1i(self.u_blit["uTex"], 0)
+            GL.glUniform1i(self.u_blit["uBg"], 1)
+            GL.glUniform1i(self.u_blit["uHasBg"], 1 if self.bg_tex else 0)
+            GL.glActiveTexture(GL.GL_TEXTURE1)
+            GL.glBindTexture(GL.GL_TEXTURE_2D, self.bg_tex or 0)
+            GL.glActiveTexture(GL.GL_TEXTURE0)
             GL.glBindTexture(GL.GL_TEXTURE_2D, self.fbo_tex)
             GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
         self.saver.frames += 1
